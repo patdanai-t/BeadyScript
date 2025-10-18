@@ -76,6 +76,7 @@ MainTab:CreateButton({
 local HighlightEnabled = true
 local HighlightColor = Color3.fromRGB(0, 255, 255)
 local HighlightTransparency = 0.7
+local TargetSize = Vector3.new(20, 20, 20)
 
 local function UpdateAllHighlights()
    for _, playerName in pairs(SelectedPlayers) do
@@ -123,7 +124,7 @@ local function ModifyTargetSize()
             for _, child in pairs(head2:GetChildren()) do
                if string.match(child.Name, "^TARGET_") then
                   if child:IsA("BasePart") then
-                     child.Size = Vector3.new(20, 20, 20)
+                     child.Size = TargetSize
                      child.Transparency = HighlightTransparency
                      
                      local highlight = child:FindFirstChildOfClass("Highlight")
@@ -159,8 +160,40 @@ local function ModifyTargetSize()
    return modifiedCount
 end
 
+MainTab:CreateInput({
+   Name = "Target Size (X,Y,Z)",
+   PlaceholderText = "20,20,20",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+      local values = {}
+      for value in string.gmatch(Text, "[^,]+") do
+         local num = tonumber(value)
+         if num then
+            table.insert(values, num)
+         end
+      end
+      
+      if #values == 3 then
+         TargetSize = Vector3.new(values[1], values[2], values[3])
+         Rayfield:Notify({
+            Title = "Size Updated",
+            Content = string.format("Set to %.1f,%.1f,%.1f", values[1], values[2], values[3]),
+            Duration = 3,
+            Image = 4483362458,
+         })
+      else
+         Rayfield:Notify({
+            Title = "Error",
+            Content = "Please enter format: X,Y,Z",
+            Duration = 3,
+            Image = 4483362458,
+         })
+      end
+   end,
+})
+
 MainTab:CreateButton({
-   Name = "Modify Size to 20,20,20",
+   Name = "Apply Target Size",
    Callback = function()
       if #SelectedPlayers == 0 then
          Rayfield:Notify({
@@ -177,6 +210,31 @@ MainTab:CreateButton({
       Rayfield:Notify({
          Title = "Success",
          Content = "Modified " .. count .. " targets",
+         Duration = 5,
+         Image = 4483362458,
+      })
+   end,
+})
+
+MainTab:CreateButton({
+   Name = "Reset Target Size to 0,0,0",
+   Callback = function()
+      if #SelectedPlayers == 0 then
+         Rayfield:Notify({
+            Title = "Error",
+            Content = "Please select at least 1 player",
+            Duration = 3,
+            Image = 4483362458,
+         })
+         return
+      end
+      
+      TargetSize = Vector3.new(0, 0, 0)
+      local count = ModifyTargetSize()
+      
+      Rayfield:Notify({
+         Title = "Success",
+         Content = "Reset " .. count .. " targets to 0,0,0",
          Duration = 5,
          Image = 4483362458,
       })
