@@ -1,5 +1,6 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+
 local Window = Rayfield:CreateWindow({
    Name = "god weapon",
    LoadingTitle = "Torch ดิว่ะ",
@@ -72,6 +73,43 @@ MainTab:CreateButton({
    end,
 })
 
+local HighlightEnabled = true
+local HighlightColor = Color3.fromRGB(0, 255, 255)
+local HighlightTransparency = 0.7
+
+local function UpdateAllHighlights()
+   for _, playerName in pairs(SelectedPlayers) do
+      local playerModel = game.Workspace:FindFirstChild(playerName)
+      
+      if playerModel then
+         local head2 = playerModel:FindFirstChild("Head2")
+         
+         if head2 then
+            for _, child in pairs(head2:GetChildren()) do
+               if string.match(child.Name, "^TARGET_") and child:IsA("BasePart") then
+                  local highlight = child:FindFirstChildOfClass("Highlight")
+                  local selectionBox = child:FindFirstChildOfClass("SelectionBox")
+                  
+                  if highlight then
+                     highlight.Enabled = HighlightEnabled
+                     highlight.OutlineColor = HighlightColor
+                  end
+                  
+                  if selectionBox then
+                     selectionBox.Visible = HighlightEnabled
+                     selectionBox.Color3 = HighlightColor
+                  end
+                  
+                  if HighlightEnabled then
+                     child.Transparency = HighlightTransparency
+                  end
+               end
+            end
+         end
+      end
+   end
+end
+
 local function ModifyTargetSize()
    local modifiedCount = 0
    
@@ -86,6 +124,30 @@ local function ModifyTargetSize()
                if string.match(child.Name, "^TARGET_") then
                   if child:IsA("BasePart") then
                      child.Size = Vector3.new(20, 20, 20)
+                     child.Transparency = HighlightTransparency
+                     
+                     local highlight = child:FindFirstChildOfClass("Highlight")
+                     if not highlight then
+                        highlight = Instance.new("Highlight")
+                        highlight.Parent = child
+                     end
+                     highlight.FillColor = HighlightColor
+                     highlight.OutlineColor = HighlightColor
+                     highlight.FillTransparency = 1
+                     highlight.OutlineTransparency = 0
+                     highlight.Enabled = HighlightEnabled
+                     
+                     local selectionBox = child:FindFirstChildOfClass("SelectionBox")
+                     if not selectionBox then
+                        selectionBox = Instance.new("SelectionBox")
+                        selectionBox.Parent = child
+                        selectionBox.Adornee = child
+                     end
+                     selectionBox.Color3 = HighlightColor
+                     selectionBox.LineThickness = 0.05
+                     selectionBox.Transparency = 0
+                     selectionBox.Visible = HighlightEnabled
+                     
                      modifiedCount = modifiedCount + 1
                   end
                end
@@ -118,6 +180,40 @@ MainTab:CreateButton({
          Duration = 5,
          Image = 4483362458,
       })
+   end,
+})
+
+local HighlightSection = MainTab:CreateSection("Highlight Settings")
+
+MainTab:CreateToggle({
+   Name = "Enable Highlight",
+   CurrentValue = true,
+   Flag = "HighlightToggle",
+   Callback = function(Value)
+      HighlightEnabled = Value
+      UpdateAllHighlights()
+   end,
+})
+
+MainTab:CreateSlider({
+   Name = "Transparency",
+   Range = {0, 1},
+   Increment = 0.1,
+   CurrentValue = 0.7,
+   Flag = "HighlightTransparency",
+   Callback = function(Value)
+      HighlightTransparency = Value
+      UpdateAllHighlights()
+   end,
+})
+
+MainTab:CreateColorPicker({
+   Name = "Highlight Color",
+   Color = Color3.fromRGB(0, 255, 255),
+   Flag = "HighlightColor",
+   Callback = function(Value)
+      HighlightColor = Value
+      UpdateAllHighlights()
    end,
 })
 
