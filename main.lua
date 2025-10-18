@@ -26,7 +26,7 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
-local MainTab = Window:CreateTab("Main", 4483362458)
+local MainTab = Window:CreateTab("PVP", 4483362458)
 
 local SelectedPlayers = {}
 
@@ -38,7 +38,7 @@ local function GetAllPlayers()
    return playerNames
 end
 
-local Section = MainTab:CreateSection("Select Players")
+local Section = MainTab:CreateSection("Gun")
 
 local PlayerDropdown
 local function UpdateDropdown()
@@ -321,3 +321,4 @@ game.Players.PlayerRemoving:Connect(function()
    wait(1)
    UpdateDropdown()
 end)
+
