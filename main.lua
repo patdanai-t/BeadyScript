@@ -23,7 +23,7 @@ local Window = Rayfield:CreateWindow({
       FileName = "Key",
       SaveKey = true,
       GrabKeyFromSite = false,
-      Key = {"TheTorch"}
+      Key = {"Torch ดิว่ะ"}
    }
 })
 
@@ -512,3 +512,4 @@ game.Players.PlayerRemoving:Connect(function()
    wait(1)
    UpdateDropdown()
 end)
+
