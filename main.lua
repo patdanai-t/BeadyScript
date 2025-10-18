@@ -121,6 +121,65 @@ MainTab:CreateButton({
    end,
 })
 
+local AutoArmorSection = MainTab:CreateSection("Auto Armor")
+
+local AutoArmorEnabled = false
+
+local function CheckAndEquipArmor()
+   local player = game.Players.LocalPlayer
+   local character = player.Character
+   
+   if not character then return end
+   
+   local playerModel = game.Workspace:FindFirstChild(player.Name)
+   if not playerModel then return end
+   
+   local bodyArmor = playerModel:FindFirstChild("BodyArmor")
+   
+   if not bodyArmor then
+      local VirtualInputManager = game:GetService("VirtualInputManager")
+      VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
+      wait(0.1)
+      VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)
+   end
+end
+
+local function StartAutoArmor()
+   spawn(function()
+      while AutoArmorEnabled do
+         CheckAndEquipArmor()
+         wait(1)
+      end
+   end)
+end
+
+MainTab:CreateToggle({
+   Name = "Auto Equip Armor",
+   CurrentValue = false,
+   Flag = "AutoArmor",
+   Callback = function(Value)
+      AutoArmorEnabled = Value
+      
+      if Value then
+         StartAutoArmor()
+         
+         Rayfield:Notify({
+            Title = "Auto Armor Started",
+            Content = "Auto armor enabled",
+            Duration = 3,
+            Image = 4483362458,
+         })
+      else
+         Rayfield:Notify({
+            Title = "Auto Armor Stopped",
+            Content = "Auto armor disabled",
+            Duration = 3,
+            Image = 4483362458,
+         })
+      end
+   end,
+})
+
 local FarmTab = Window:CreateTab("Farm", 4483362458)
 
 local FarmSection = FarmTab:CreateSection("Auto Farm")
