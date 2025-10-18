@@ -124,6 +124,32 @@ MainTab:CreateButton({
 local AutoArmorSection = MainTab:CreateSection("Auto Armor")
 
 local AutoArmorEnabled = false
+local ArmorKeyNumber = 1
+
+MainTab:CreateInput({
+   Name = "Armor Key Number (1-8)",
+   PlaceholderText = "1",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+      local number = tonumber(Text)
+      if number and number >= 1 and number <= 8 then
+         ArmorKeyNumber = math.floor(number)
+         Rayfield:Notify({
+            Title = "Armor Key Updated",
+            Content = "Set to key " .. ArmorKeyNumber,
+            Duration = 3,
+            Image = 4483362458,
+         })
+      else
+         Rayfield:Notify({
+            Title = "Error",
+            Content = "Please enter number 1-8",
+            Duration = 3,
+            Image = 4483362458,
+         })
+      end
+   end,
+})
 
 local function CheckAndEquipArmor()
    local player = game.Players.LocalPlayer
@@ -138,9 +164,20 @@ local function CheckAndEquipArmor()
    
    if not bodyArmor then
       local VirtualInputManager = game:GetService("VirtualInputManager")
-      VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
+      local keyCode = Enum.KeyCode["One"]
+      
+      if ArmorKeyNumber == 2 then keyCode = Enum.KeyCode.Two
+      elseif ArmorKeyNumber == 3 then keyCode = Enum.KeyCode.Three
+      elseif ArmorKeyNumber == 4 then keyCode = Enum.KeyCode.Four
+      elseif ArmorKeyNumber == 5 then keyCode = Enum.KeyCode.Five
+      elseif ArmorKeyNumber == 6 then keyCode = Enum.KeyCode.Six
+      elseif ArmorKeyNumber == 7 then keyCode = Enum.KeyCode.Seven
+      elseif ArmorKeyNumber == 8 then keyCode = Enum.KeyCode.Eight
+      end
+      
+      VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
       wait(0.1)
-      VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)
+      VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
    end
 end
 
@@ -321,4 +358,3 @@ game.Players.PlayerRemoving:Connect(function()
    wait(1)
    UpdateDropdown()
 end)
-
