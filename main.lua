@@ -638,7 +638,7 @@ local function StartGrapeFarm()
          local args = {
             "post",
             "Grape",
-            3,
+            5,
             game:GetService("Players").LocalPlayer:WaitForChild("Truck (150Kg)(Free)")
          }
          game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("data"):FireServer(unpack(args))
