@@ -635,6 +635,20 @@ local function StartGrapeFarm()
    
    spawn(function()
       while GrapeFarmEnabled do
+         local args = {
+            "post",
+            "Grape",
+            1,
+            game:GetService("Players").LocalPlayer:WaitForChild("Truck (150Kg)(Free)")
+         }
+         game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("data"):FireServer(unpack(args))
+         
+         wait(5)
+      end
+   end)
+   
+   spawn(function()
+      while GrapeFarmEnabled do
          if CountVisitedGrapes() >= 10 then
             VisitedGrapes = {}
             wait(0.5)
@@ -646,28 +660,8 @@ local function StartGrapeFarm()
             local success = TeleportAndJump(grape.CFrame)
             
             if success then
-               wait(3)
-               
-               local character = player.Character
-               if character then
-                  local humanoid = character:FindFirstChild("Humanoid")
-                  if humanoid then
-                     humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-                  end
-               end
-               
-               wait(5)
-               
-               local args = {
-                  "post",
-                  "Grape",
-                  1,
-                  game:GetService("Players").LocalPlayer:WaitForChild("Truck (150Kg)(Free)")
-               }
-               game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("data"):FireServer(unpack(args))
-               
                VisitedGrapes[positionKey] = true
-               wait(0.5)
+               wait(5)
             else
                wait(1)
             end
