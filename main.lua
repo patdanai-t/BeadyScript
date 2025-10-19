@@ -275,6 +275,83 @@ MainTab:CreateColorPicker({
    end,
 })
 
+local AutoMedSection = MainTab:CreateSection("Auto Med")
+
+local AutoMedEnabled = false
+local MedToggleKey = Enum.KeyCode.F
+local MedKeyName = "F"
+
+MainTab:CreateInput({
+   Name = "Toggle Key",
+   PlaceholderText = "F",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+      local keyText = Text:upper()
+      local success, keyCode = pcall(function()
+         return Enum.KeyCode[keyText]
+      end)
+      
+      if success and keyCode then
+         MedToggleKey = keyCode
+         MedKeyName = keyText
+         Rayfield:Notify({
+            Title = "Key Updated",
+            Content = "Toggle key set to " .. keyText,
+            Duration = 3,
+            Image = 4483362458,
+         })
+      else
+         Rayfield:Notify({
+            Title = "Error",
+            Content = "Invalid key name",
+            Duration = 3,
+            Image = 4483362458,
+         })
+      end
+   end,
+})
+
+local function StartAutoMed()
+   spawn(function()
+      while AutoMedEnabled do
+         local args = {
+            "Medkit",
+            "",
+            ""
+         }
+         game.Lighting:WaitForChild("Sky"):WaitForChild("Optimized"):FireServer(unpack(args))
+         wait(5)
+      end
+   end)
+end
+
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+   if gameProcessed then return end
+   
+   if input.KeyCode == MedToggleKey then
+      AutoMedEnabled = not AutoMedEnabled
+      
+      if AutoMedEnabled then
+         StartAutoMed()
+         Rayfield:Notify({
+            Title = "Auto Med Started",
+            Content = "Press " .. MedKeyName .. " to stop",
+            Duration = 3,
+            Image = 4483362458,
+         })
+      else
+         Rayfield:Notify({
+            Title = "Auto Med Stopped",
+            Content = "Press " .. MedKeyName .. " to start",
+            Duration = 3,
+            Image = 4483362458,
+         })
+      end
+   end
+end)
+
+MainTab:CreateLabel("Current Toggle Key: F")
+
 local AutoArmorSection = MainTab:CreateSection("Auto Armor")
 
 local AutoArmorEnabled = false
@@ -373,7 +450,7 @@ MainTab:CreateToggle({
 
 local FarmTab = Window:CreateTab("Farm", 4483362458)
 
-local FarmSection = FarmTab:CreateSection("Auto Farm")
+local FarmSection = FarmTab:CreateSection("Auto Farm Parole")
 
 local FarmEnabled = false
 
@@ -477,7 +554,7 @@ local function StartFarm()
 end
 
 FarmTab:CreateToggle({
-   Name = "Auto Farm",
+   Name = "Auto Farm Parole",
    CurrentValue = false,
    Flag = "AutoFarm",
    Callback = function(Value)
@@ -503,6 +580,132 @@ FarmTab:CreateToggle({
    end,
 })
 
+local GrapeSection = FarmTab:CreateSection("Auto Farm Grape")
+
+local GrapeFarmEnabled = false
+local VisitedGrapes = {}
+
+local function GetPositionKey(position)
+   return string.format("%.2f_%.2f_%.2f", position.X, position.Y, position.Z)
+end
+
+local function CountVisitedGrapes()
+   local count = 0
+   for _ in pairs(VisitedGrapes) do
+      count = count + 1
+   end
+   return count
+end
+
+local function TeleportAndJump(cframe)
+   local player = game.Players.LocalPlayer
+   local character = player.Character
+   if not character then return false end
+   
+   local hrp = character:FindFirstChild("HumanoidRootPart")
+   local humanoid = character:FindFirstChild("Humanoid")
+   
+   if not hrp or not humanoid then return false end
+   
+   hrp.CFrame = cframe
+   wait(0.1)
+   humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+   
+   return true
+end
+
+local function FindAvailableGrape()
+   local grapeFolder = game.Workspace.JOB.JOB.SCRIPT.Grape
+   
+   for _, grape in pairs(grapeFolder:GetChildren()) do
+      if grape:IsA("BasePart") then
+         local positionKey = GetPositionKey(grape.Position)
+         
+         if not VisitedGrapes[positionKey] then
+            return grape, positionKey
+         end
+      end
+   end
+   
+   return nil, nil
+end
+
+local function StartGrapeFarm()
+   local player = game.Players.LocalPlayer
+   
+   spawn(function()
+      while GrapeFarmEnabled do
+         if CountVisitedGrapes() >= 10 then
+            VisitedGrapes = {}
+            wait(0.5)
+         end
+         
+         local grape, positionKey = FindAvailableGrape()
+         
+         if grape then
+            local success = TeleportAndJump(grape.CFrame)
+            
+            if success then
+               wait(3)
+               
+               local character = player.Character
+               if character then
+                  local humanoid = character:FindFirstChild("Humanoid")
+                  if humanoid then
+                     humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                  end
+               end
+               
+               wait(5)
+               
+               local args = {
+                  "post",
+                  "Grape",
+                  1,
+                  game:GetService("Players").LocalPlayer:WaitForChild("Truck (150Kg)(Free)")
+               }
+               game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("data"):FireServer(unpack(args))
+               
+               VisitedGrapes[positionKey] = true
+               wait(0.5)
+            else
+               wait(1)
+            end
+         else
+            VisitedGrapes = {}
+            wait(0.5)
+         end
+      end
+   end)
+end
+
+FarmTab:CreateToggle({
+   Name = "Auto Farm Grape",
+   CurrentValue = false,
+   Flag = "AutoGrapeFarm",
+   Callback = function(Value)
+      GrapeFarmEnabled = Value
+      
+      if Value then
+         StartGrapeFarm()
+         
+         Rayfield:Notify({
+            Title = "Grape Farm Started",
+            Content = "Auto grape farm enabled",
+            Duration = 3,
+            Image = 4483362458,
+         })
+      else
+         Rayfield:Notify({
+            Title = "Grape Farm Stopped",
+            Content = "Auto grape farm disabled",
+            Duration = 3,
+            Image = 4483362458,
+         })
+      end
+   end,
+})
+
 game.Players.PlayerAdded:Connect(function()
    wait(1)
    UpdateDropdown()
@@ -512,5 +715,3 @@ game.Players.PlayerRemoving:Connect(function()
    wait(1)
    UpdateDropdown()
 end)
-
-
